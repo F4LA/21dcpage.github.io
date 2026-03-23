@@ -686,6 +686,32 @@
 (function() {
   'use strict';
 
+  // === UTM FORWARDING ===
+  // Reads any UTM params from the landing page URL and appends them
+  // to all checkout links so attribution carries through to GHL.
+  // Works dynamically for any affiliate — no code changes needed.
+  (function() {
+    var utmKeys = [
+      'utm_source', 'utm_medium', 'utm_campaign',
+      'utm_term', 'utm_content'
+    ];
+    var pageParams = new URLSearchParams(window.location.search);
+    var utmParams = new URLSearchParams();
+
+    utmKeys.forEach(function(key) {
+      if (pageParams.has(key)) {
+        utmParams.set(key, pageParams.get(key));
+      }
+    });
+
+    if (utmParams.toString()) {
+      document.querySelectorAll('.checkout-link').forEach(function(link) {
+        var base = link.getAttribute('href').split('?')[0];
+        link.setAttribute('href', base + '?' + utmParams.toString());
+      });
+    }
+  })();
+
   // === COUNTDOWN TIMER ===
   // Registration closes March 28, 2026 at 12:00 PM EST (17:00 UTC)
   const deadline = new Date('2026-03-28T17:00:00Z');
@@ -764,7 +790,11 @@
   }
 
   function getCheckoutLink() {
-    return purchaseCount >= TIER_1_LIMIT ? LINK_147 : LINK_97;
+    // Preserve any UTM params that were already applied by the UTM forwarder
+    var existingLink = document.querySelector('.checkout-link');
+    var existingParams = existingLink ? existingLink.getAttribute('href').split('?')[1] : null;
+    var base = purchaseCount >= TIER_1_LIMIT ? LINK_147 : LINK_97;
+    return existingParams ? base + '?' + existingParams : base;
   }
 
   function updateSpotsUI() {
