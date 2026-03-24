@@ -12,6 +12,14 @@
         https://www.perplexity.ai/computer
 -->
 
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-WHG7DNVZ');</script>
+<!-- End Google Tag Manager -->
+
 <!-- Perplexity Computer Attribution — SEO Meta Tags -->
 <meta name="generator" content="Perplexity Computer">
 <meta name="author" content="Perplexity Computer">
@@ -29,6 +37,11 @@
 <link rel="stylesheet" href="./style.css">
 </head>
 <body>
+
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WHG7DNVZ"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
 
 <!-- ============================================================
      STICKY TOP BAR
@@ -687,9 +700,6 @@
   'use strict';
 
   // === UTM FORWARDING ===
-  // Reads any UTM params from the landing page URL and appends them
-  // to all checkout links so attribution carries through to GHL.
-  // Works dynamically for any affiliate — no code changes needed.
   (function() {
     var utmKeys = [
       'utm_source', 'utm_medium', 'utm_campaign',
@@ -713,7 +723,6 @@
   })();
 
   // === COUNTDOWN TIMER ===
-  // Registration closes March 28, 2026 at 12:00 PM EST (17:00 UTC)
   const deadline = new Date('2026-03-28T17:00:00Z');
 
   function updateCountdown() {
@@ -743,20 +752,17 @@
   setInterval(updateCountdown, 1000);
 
   // === LIVE SPOTS COUNTER — GOOGLE SHEET INTEGRATION ===
-  // Reads purchase count from a public Google Sheet and updates
-  // spots remaining, pricing, and checkout links in real time.
   var SHEET_ID = '1OyqosZzgTxOwAs_j2VL7-xtSiIGVPUYKYpGUNnXZnG0';
   var SHEET_GID = '1013531920';
   var TOTAL_SPOTS = 60;
-  var TIER_1_LIMIT = 30;  // first 30 at $97, next 30 at $147
+  var TIER_1_LIMIT = 30;
   var LINK_97  = 'https://drjoeymunoz.com/21-day-challenge-checkout';
   var LINK_147 = 'https://drjoeymunoz.com/21-day-challenge-checkout-147';
 
-  var purchaseCount = 0;   // fetched from Google Sheet
+  var purchaseCount = 0;
   var currentSpots  = TOTAL_SPOTS;
   var dataLoaded    = false;
 
-  // Fetch purchase count from Google Sheets Visualization API
   function fetchPurchaseCount() {
     var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID +
               '/gviz/tq?tqx=out:json&gid=' + SHEET_GID +
@@ -765,13 +771,10 @@
     fetch(url)
       .then(function(res) { return res.text(); })
       .then(function(text) {
-        // Strip JSONP wrapper: /*O_o*/\ngoogle.visualization.Query.setResponse({...});
         var json = text.replace(/^[^{]+/, '').replace(/\);?$/, '');
         var data = JSON.parse(json);
         if (data.table && data.table.rows && data.table.rows[0]) {
           var count = data.table.rows[0].c[0].v;
-          // COUNT(A) includes the header row in some cases; the Google Viz
-          // API COUNT on a column with a header counts only data rows.
           purchaseCount = Math.max(0, Math.floor(count));
         }
         currentSpots = Math.max(0, TOTAL_SPOTS - purchaseCount);
@@ -779,18 +782,15 @@
         updateSpotsUI();
       })
       .catch(function(err) {
-        // If fetch fails, keep last known value and try again next cycle
         console.warn('Sheet fetch error:', err);
       });
   }
 
-  // Determine current price tier based on actual purchases
   function getCurrentPrice() {
     return purchaseCount >= TIER_1_LIMIT ? 147 : 97;
   }
 
   function getCheckoutLink() {
-    // Preserve any UTM params that were already applied by the UTM forwarder
     var existingLink = document.querySelector('.checkout-link');
     var existingParams = existingLink ? existingLink.getAttribute('href').split('?')[1] : null;
     var base = purchaseCount >= TIER_1_LIMIT ? LINK_147 : LINK_97;
@@ -803,7 +803,6 @@
     var inTier2 = purchaseCount >= TIER_1_LIMIT;
     var checkoutUrl = getCheckoutLink();
 
-    // Update all spot count displays
     var spotEls = [
       'spots-banner-count', 'hero-spots-count', 'offer-spots-count',
       'final-spots-count', 'floating-spots-count'
@@ -813,23 +812,19 @@
       if (el) el.textContent = currentSpots;
     });
 
-    // Update all dynamic price text
     document.querySelectorAll('.dynamic-price').forEach(function(el) {
       el.textContent = priceStr;
     });
 
-    // Update offer section main price
     var offerPrice = document.getElementById('offer-price');
     if (offerPrice) {
       offerPrice.innerHTML = 'Join Today for <span class="dynamic-price">' + priceStr + '</span>';
     }
 
-    // Update pricing section checkout link only
     document.querySelectorAll('.checkout-link').forEach(function(link) {
       link.href = checkoutUrl;
     });
 
-    // Update tier visuals in offer box
     var tierEarly = document.getElementById('tier-early');
     var tierRegular = document.getElementById('tier-regular');
     if (tierEarly && tierRegular) {
@@ -846,21 +841,19 @@
       }
     }
 
-    // Update progress bar fill
     var fill = document.getElementById('offer-spots-fill');
     if (fill) {
       var pct = (purchaseCount / TOTAL_SPOTS) * 100;
       fill.style.width = pct + '%';
       if (currentSpots <= 10) {
-        fill.style.background = '#EF4444';          // red urgency
+        fill.style.background = '#EF4444';
       } else if (inTier2) {
-        fill.style.background = '#ECC94B';          // gold — tier 2
+        fill.style.background = '#ECC94B';
       } else {
-        fill.style.background = 'var(--color-accent)'; // orange
+        fill.style.background = 'var(--color-accent)';
       }
     }
 
-    // Update price note under offer
     var priceNote = document.getElementById('offer-price-note');
     if (priceNote) {
       if (currentSpots <= 0) {
@@ -874,7 +867,6 @@
     }
   }
 
-  // Initial fetch + refresh every 60 seconds
   fetchPurchaseCount();
   setInterval(fetchPurchaseCount, 60000);
 
@@ -1022,9 +1014,7 @@
     fadeElements.forEach(el => revealObserver.observe(el));
   }
 
-  // Smooth scroll for non-pricing CTAs
-  // On mobile, scroll directly to the checkout button so users don't
-  // have to scroll past the entire value stack to find it.
+  // Smooth scroll
   document.querySelectorAll('.scroll-to-pricing').forEach(function(link) {
     link.addEventListener('click', function(e) {
       e.preventDefault();
