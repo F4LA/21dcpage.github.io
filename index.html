@@ -701,23 +701,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   // === UTM FORWARDING ===
   (function() {
-    var utmKeys = [
+    var forwardKeys = [
       'utm_source', 'utm_medium', 'utm_campaign',
-      'utm_term', 'utm_content'
+      'utm_term', 'utm_content', 'coupon'
     ];
     var pageParams = new URLSearchParams(window.location.search);
-    var utmParams = new URLSearchParams();
+    var forwardParams = new URLSearchParams();
 
-    utmKeys.forEach(function(key) {
+    forwardKeys.forEach(function(key) {
       if (pageParams.has(key)) {
-        utmParams.set(key, pageParams.get(key));
+        forwardParams.set(key, pageParams.get(key));
       }
     });
 
-    if (utmParams.toString()) {
+    if (forwardParams.toString()) {
       document.querySelectorAll('.checkout-link').forEach(function(link) {
         var base = link.getAttribute('href').split('?')[0];
-        link.setAttribute('href', base + '?' + utmParams.toString());
+        link.setAttribute('href', base + '?' + forwardParams.toString());
       });
     }
   })();
